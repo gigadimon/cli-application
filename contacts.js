@@ -2,36 +2,31 @@ const fs = require("fs");
 const path = require("path");
 const contactsPath = path.join(__dirname, "contacts.json");
 
+const { getAllHandler } = require("./handlers/getAllHandler");
+const { getByIdHandler } = require("./handlers/getByIdHandler");
+const { removeHandler } = require("./handlers/removeHandler");
+const { addHandler } = require("./handlers/addHandler");
+
 function listContacts() {
-  return JSON.parse(fs.readFileSync(contactsPath, "utf-8"));
+  fs.readFile(contactsPath, "utf-8", getAllHandler);
 }
 
-function getContactById(contactId) {
-  const contacts = listContacts();
-  return contacts.reduce((acc, el) => (el.id === contactId ? el : acc), {});
+function getContactById(id) {
+  fs.readFile(contactsPath, "utf-8", (error, data) =>
+    getByIdHandler(error, data, id)
+  );
 }
 
-function removeContact(contactId) {
-  const contacts = listContacts();
-  const newContacts = contacts.filter((contact) => contact.id !== contactId);
-  fs.writeFileSync(contactsPath, JSON.stringify(newContacts), "utf-8");
-  console.log(`Contact with id ${contactId} removed`);
+function removeContact(id) {
+  fs.readFile(contactsPath, "utf-8", (error, data) =>
+    removeHandler(error, data, id)
+  );
 }
 
-function addContact(name, email, phone) {
-  const contacts = listContacts();
-  const id = String(Number(contacts[contacts.length - 1].id) + 1);
-  const newContacts = [
-    ...contacts,
-    {
-      id,
-      name,
-      email,
-      phone,
-    },
-  ];
-  fs.writeFileSync(contactsPath, JSON.stringify(newContacts), "utf-8");
-  console.log("Contact added by id:", id);
+function addContact(contact) {
+  fs.readFile(contactsPath, "utf-8", (error, data) =>
+    addHandler(error, data, contact)
+  );
 }
 
 module.exports = {
